@@ -60,7 +60,7 @@ def exitt():
     root.destroy()
     
 root = tk.Tk()
-root.title("Pooling") 
+root.title("AGP") 
 root.geometry("300x300")
 
 ttk.Button(root, text='FROM', command=from_date).pack(padx=10, pady=10)
@@ -68,14 +68,23 @@ ttk.Button(root, text='FROM', command=from_date).pack(padx=10, pady=10)
 ttk.Button(root, text='TO', command=to_date).pack(padx=10, pady=10)
 
 root.mainloop()
+
 try:
     os.remove("list.dat")  
 except:
     pass
+start_date = str(start_date).split("-")
+from_date = "#" + start_date[1] + "/" + start_date [2] + "/" + start_date[0] + " 00:00:00#"
+
+end_date = str(end_date).split("-")
+to_date = "#" + end_date[1] + "/" + end_date [2] + "/" + end_date[0] + " 23:59:59#"
+
 
 conn = pyodbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=./att2000.mdb;')
 cursor = conn.cursor()
-cursor.execute('select ui.Badgenumber , CHECKTIME , CHECKTYPE from CHECKINOUT as ch left join USERINFO as ui on ch.USERID = ui.USERID')
+sql = "SELECT ui.Badgenumber, ch.CHECKTIME, ch.CHECKTYPE FROM CHECKINOUT AS ch LEFT JOIN USERINFO AS ui ON ch.USERID = ui.USERID WHERE (((ch.CHECKTIME)BETWEEN %s AND %s)) order by ch.CHECKTIME desc"%(from_date,to_date)
+#cursor.execute('select ui.Badgenumber , CHECKTIME , CHECKTYPE from CHECKINOUT as ch left join USERINFO as ui on ch.USERID = ui.USERID')
+cursor.execute(sql)
 user_id= ""
 date = ""
 code = ""
